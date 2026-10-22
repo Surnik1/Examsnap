@@ -1,0 +1,399 @@
+{% extends "quiz_app/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+    <!-- ================================================================= -->
+    <!-- LEFT / MAIN COLUMN: Input Zone OR Active Quiz / Results (8 cols) -->
+    <!-- ================================================================= -->
+    <div class="lg:col-span-8 space-y-6">
+
+        <!-- 1. INPUT ZONE CARD -->
+        <section id="input-section" class="glass-panel rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden transition-all duration-300">
+            <!-- Decorative background gradient accent -->
+            <div class="absolute -top-24 -right-24 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl">📝</span>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Конспект урока или учебника</h1>
+                        <p class="text-xs sm:text-sm text-slate-400">Вставь любой фрагмент текста, и AI за секунды превратит его в тест</p>
+                    </div>
+                </div>
+                <button type="button" id="btn-clear-input" class="text-xs text-slate-400 hover:text-rose-400 transition-colors flex items-center space-x-1 py-1 px-2.5 rounded-lg hover:bg-slate-800/60" title="Очистить поле">
+                    <span>✕</span>
+                    <span class="hidden sm:inline">Очистить</span>
+                </button>
+            </div>
+
+            <!-- Quick Demo Presets -->
+            <div class="mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 flex items-center space-x-1.5">
+                        <span>⚡</span>
+                        <span>Быстрые пресеты для демо (1 клик):</span>
+                    </span>
+                    <span class="text-[11px] text-slate-500">Кликни для теста ➔</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <button type="button" class="preset-btn text-left p-2.5 rounded-xl bg-slate-800/80 hover:bg-indigo-950/70 border border-slate-700/70 hover:border-indigo-500/50 transition-all duration-200 group" data-preset="biology">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-lg group-hover:scale-110 transition-transform">🌿</span>
+                            <div>
+                                <div class="text-xs font-bold text-slate-200 group-hover:text-indigo-300">Биология</div>
+                                <div class="text-[11px] text-slate-400">Фотосинтез</div>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button type="button" class="preset-btn text-left p-2.5 rounded-xl bg-slate-800/80 hover:bg-indigo-950/70 border border-slate-700/70 hover:border-indigo-500/50 transition-all duration-200 group" data-preset="informatics">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-lg group-hover:scale-110 transition-transform">💻</span>
+                            <div>
+                                <div class="text-xs font-bold text-slate-200 group-hover:text-indigo-300">Информатика</div>
+                                <div class="text-[11px] text-slate-400">Алгоритмы и Python</div>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button type="button" class="preset-btn text-left p-2.5 rounded-xl bg-slate-800/80 hover:bg-indigo-950/70 border border-slate-700/70 hover:border-indigo-500/50 transition-all duration-200 group" data-preset="history">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-lg group-hover:scale-110 transition-transform">🏛️</span>
+                            <div>
+                                <div class="text-xs font-bold text-slate-200 group-hover:text-indigo-300">История</div>
+                                <div class="text-[11px] text-slate-400">Вторая мировая война</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notes Textarea -->
+            <div class="relative mb-4">
+                <textarea 
+                    id="notes-textarea" 
+                    rows="7" 
+                    placeholder="Вставь сюда конспект урока или параграф учебника..."
+                    class="w-full bg-slate-950/70 border border-slate-700/80 rounded-xl p-4 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-y"
+                ></textarea>
+                <div class="flex items-center justify-between mt-1 px-1">
+                    <span id="char-counter" class="text-xs text-slate-500">0 символов</span>
+                    <span class="text-xs text-slate-500">Минимум 10 символов</span>
+                </div>
+            </div>
+
+            <!-- Question Count Selector -->
+            <div class="mb-5 p-3.5 rounded-xl bg-slate-950/50 border border-slate-800">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+                    <label class="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
+                        <span class="text-indigo-400">🔢</span>
+                        <span>Сколько вопросов сгенерировать:</span>
+                    </label>
+                    <span id="question-count-label" class="text-xs font-bold text-indigo-400">
+                        5 вопросов (Стандарт)
+                    </span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <button type="button" class="q-count-btn p-2 rounded-lg text-xs font-semibold border transition-all text-center bg-slate-900 border-slate-700 text-slate-300 hover:border-indigo-500/60 hover:text-white" data-count="3">
+                        ⚡ 3 (Экспресс)
+                    </button>
+                    <button type="button" class="q-count-btn p-2 rounded-lg text-xs font-semibold border transition-all text-center bg-indigo-600/30 border-indigo-500 text-indigo-200 ring-2 ring-indigo-500/40" data-count="5">
+                        🎯 5 (Стандарт)
+                    </button>
+                    <button type="button" class="q-count-btn p-2 rounded-lg text-xs font-semibold border transition-all text-center bg-slate-900 border-slate-700 text-slate-300 hover:border-indigo-500/60 hover:text-white" data-count="10">
+                        🏆 10 (Экзамен)
+                    </button>
+                    <button type="button" class="q-count-btn p-2 rounded-lg text-xs font-semibold border transition-all text-center bg-slate-900 border-slate-700 text-slate-300 hover:border-indigo-500/60 hover:text-white" data-count="50">
+                        🚀 50 (Супер-тест)
+                    </button>
+                </div>
+
+                <!-- Custom Question Count Input -->
+                <div class="mt-3 pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row items-center gap-2.5">
+                    <label for="custom-count-input" class="text-xs text-slate-300 whitespace-nowrap font-medium flex items-center space-x-1">
+                        <span>✏️</span>
+                        <span>Своё число вопросов:</span>
+                    </label>
+                    <div class="relative w-full sm:w-56">
+                        <input 
+                            type="number" 
+                            id="custom-count-input" 
+                            min="1" 
+                            placeholder="Например: 15, 25, 50..." 
+                            class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-indigo-300 placeholder-slate-500 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        >
+                    </div>
+                    <span class="text-[11px] text-slate-400">
+                        Введи любое число (10-100) — система создаст ровно столько вопросов!
+                    </span>
+                </div>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="input-error" class="hidden mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center space-x-2">
+                <span>⚠️</span>
+                <span id="input-error-msg">Ошибка валидации конспекта</span>
+            </div>
+
+            <!-- Submit Button with Spinner -->
+            <div class="flex flex-col sm:flex-row items-center gap-3">
+                <button 
+                    type="button" 
+                    id="btn-generate"
+                    class="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-bold text-sm sm:text-base shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 flex items-center justify-center space-x-2.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                    <!-- Spinner Icon -->
+                    <svg id="generate-spinner" class="hidden animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                    </svg>
+                    <span id="btn-generate-text">🚀 Сгенерировать тест за 5 сек</span>
+                </button>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
+                <span class="flex items-center space-x-1.5">
+                    <span>💡</span>
+                    <span>AI составит разноуровневые вопросы с подробным разбором каждого ответа</span>
+                </span>
+                <span class="hidden sm:inline text-indigo-400/80 font-medium">⚡ Любое число вопросов • 4 варианта • Разбор</span>
+            </div>
+        </section>
+
+
+        <!-- 2. INTERACTIVE QUIZ PLAYER ZONE (DYNAMIC JS) -->
+        <section id="quiz-player-section" class="hidden glass-panel rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden transition-all duration-300">
+            <!-- Top Quiz Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-slate-800 gap-2">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span id="quiz-topic-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Тест</span>
+                        <span id="quiz-source-badge" class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">AI Генерация</span>
+                    </div>
+                    <h2 id="quiz-title" class="text-xl sm:text-2xl font-bold text-white mt-1.5">Название теста</h2>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button type="button" id="btn-back-to-input" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors flex items-center space-x-1">
+                        <span>← Новый конспект</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-2">
+                    <span id="quiz-progress-text">Вопрос 1 из 5</span>
+                    <span id="quiz-score-live" class="text-indigo-400">Верно: 0 / 0</span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5">
+                    <div id="quiz-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all duration-300 w-1/5"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div id="question-card" class="mb-6">
+                <div class="bg-slate-950/60 rounded-xl p-5 sm:p-6 border border-slate-800/80 mb-6 shadow-inner">
+                    <div class="text-xs font-semibold text-indigo-400 mb-2 flex items-center space-x-1">
+                        <span id="current-question-tag">Вопрос 1</span>
+                    </div>
+                    <p id="current-question-text" class="text-base sm:text-lg font-medium text-slate-100 leading-relaxed whitespace-pre-line">
+                        Текст вопроса...
+                    </p>
+                </div>
+
+                <!-- 4 Options Grid -->
+                <div id="options-container" class="grid grid-cols-1 gap-3">
+                    <!-- Dynamic option buttons inserted via JS -->
+                </div>
+            </div>
+
+            <!-- Instant Explanation Box (Appears after answer) -->
+            <div id="explanation-box" class="hidden mb-6 p-4 sm:p-5 rounded-xl border transition-all duration-300">
+                <div class="flex items-start space-x-3">
+                    <span id="explanation-icon" class="text-xl">💡</span>
+                    <div class="flex-1">
+                        <h4 id="explanation-title" class="text-xs font-bold uppercase tracking-wider mb-1">Разбор и объяснение</h4>
+                        <p id="explanation-text" class="text-sm text-slate-200 leading-relaxed"></p>
+
+                        <!-- AI Deep Pedagogical Breakdown -->
+                        <div id="ai-explanation-container" class="mt-4 pt-3.5 border-t border-slate-700/60 hidden">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                    🤖 Глубокий ИИ-разбор (Gemini)
+                                </span>
+                                <span id="ai-explanation-status" class="text-[11px] text-slate-400"></span>
+                            </div>
+
+                            <!-- Loading State -->
+                            <div id="ai-explanation-loading" class="flex items-center space-x-2.5 py-2 text-xs text-indigo-300 bg-indigo-950/30 rounded-lg px-3 border border-indigo-500/20">
+                                <svg class="animate-spin h-4 w-4 text-indigo-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                </svg>
+                                <span>ИИ анализирует выбранный ответ, ищет причину ошибки и готовит методический совет...</span>
+                            </div>
+
+                            <!-- Content -->
+                            <div id="ai-explanation-content" class="text-xs sm:text-sm text-slate-200 leading-relaxed space-y-2.5 hidden bg-slate-950/40 p-3.5 rounded-lg border border-slate-800"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Question / Finish Action Button -->
+            <div class="flex justify-end">
+                <button 
+                    type="button" 
+                    id="btn-next-question" 
+                    class="hidden py-3 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 transition-all flex items-center space-x-2"
+                >
+                    <span id="btn-next-text">Следующий вопрос</span>
+                    <span>➔</span>
+                </button>
+            </div>
+        </section>
+
+
+        <!-- 3. RESULTS SCREEN -->
+        <section id="results-section" class="hidden glass-panel rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden text-center transition-all duration-300">
+            <!-- Trophy / Celebration Icon -->
+            <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center text-4xl shadow-xl shadow-indigo-500/20 animate-bounce">
+                <span id="result-emoji">🎉</span>
+            </div>
+
+            <h2 id="result-headline" class="text-2xl sm:text-3xl font-extrabold text-white mb-2">
+                4 / 5 — Отличный результат!
+            </h2>
+            <p id="result-subtext" class="text-slate-300 text-sm max-w-md mx-auto mb-6">
+                Ты уверенно владеешь материалом этого конспекта перед контрольной работой.
+            </p>
+
+            <!-- Score Stats Grid -->
+            <div class="grid grid-cols-3 gap-3 max-w-lg mx-auto mb-8">
+                <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+                    <div class="text-xs text-slate-400 mb-1">Правильно</div>
+                    <div id="stat-correct" class="text-xl sm:text-2xl font-black text-emerald-400">4</div>
+                </div>
+                <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+                    <div class="text-xs text-slate-400 mb-1">Точность</div>
+                    <div id="stat-percent" class="text-xl sm:text-2xl font-black text-indigo-400">80%</div>
+                </div>
+                <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+                    <div class="text-xs text-slate-400 mb-1">Всего вопросов</div>
+                    <div id="stat-total" class="text-xl sm:text-2xl font-black text-cyan-400">5</div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
+                <button type="button" id="btn-retake-quiz" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all shadow-md shadow-indigo-600/30 flex items-center justify-center space-x-2">
+                    <span>🔄</span>
+                    <span>Пройти этот тест снова</span>
+                </button>
+                <button type="button" id="btn-new-quiz-from-result" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition-all flex items-center justify-center space-x-2">
+                    <span>📝</span>
+                    <span>Новый конспект</span>
+                </button>
+                <button type="button" id="btn-toggle-review" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-indigo-300 font-semibold text-sm border border-indigo-500/30 transition-all flex items-center justify-center space-x-2">
+                    <span>📋</span>
+                    <span>Разбор всех ответов</span>
+                </button>
+            </div>
+
+            <!-- Full Review Container (Collapsible) -->
+            <div id="full-review-container" class="hidden text-left border-t border-slate-800 pt-6 mt-6 space-y-4">
+                <h3 class="text-base font-bold text-white flex items-center space-x-2 mb-4">
+                    <span>📋</span>
+                    <span>Подробный разбор теста:</span>
+                </h3>
+                <div id="review-cards-list" class="space-y-4">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+
+    <!-- ================================================================= -->
+    <!-- RIGHT COLUMN: Sidebar (Recent Quizzes + Features) (4 cols)        -->
+    <!-- ================================================================= -->
+    <div class="lg:col-span-4 space-y-6">
+
+        <!-- History of Quizzes -->
+        <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800/80">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                    <span class="text-lg">📚</span>
+                    <h2 class="text-base font-bold text-white">Недавние тесты</h2>
+                </div>
+                <span id="history-count-badge" class="px-2 py-0.5 rounded-full text-[11px] bg-slate-800 text-slate-300 font-medium">
+                    {{ recent_quizzes|length }}
+                </span>
+            </div>
+
+            <div id="history-list" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                {% if recent_quizzes %}
+                    {% for q in recent_quizzes %}
+                        <div class="history-item p-3 rounded-xl bg-slate-950/60 hover:bg-indigo-950/50 border border-slate-800/80 hover:border-indigo-500/40 cursor-pointer transition-all duration-200 group" data-quiz-id="{{ q.id }}">
+                            <div class="flex items-start justify-between gap-2">
+                                <h3 class="text-xs font-semibold text-slate-200 group-hover:text-indigo-300 line-clamp-1">
+                                    {{ q.title }}
+                                </h3>
+                                <span class="text-[10px] text-slate-500 shrink-0">
+                                    {{ q.created_at|date:"d.m H:i" }}
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between mt-1 text-[11px] text-slate-400">
+                                <span>{{ q.questions.count }} вопросов</span>
+                                <span class="text-indigo-400 group-hover:translate-x-0.5 transition-transform">Пройти ➔</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div id="empty-history-msg" class="text-center py-8 text-slate-500 text-xs">
+                        <span class="text-2xl block mb-2">📖</span>
+                        История пока пуста.<br>Сгенерируй свой первый тест!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- How it works card -->
+        <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800/80 relative overflow-hidden">
+            <h3 class="text-sm font-bold text-white mb-3 flex items-center space-x-2">
+                <span>🎯</span>
+                <span>Как ExamSnap готовит к контрольной:</span>
+            </h3>
+            <ul class="space-y-3 text-xs text-slate-300">
+                <li class="flex items-start space-x-2.5">
+                    <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 font-bold flex items-center justify-center shrink-0 text-[10px]">1</span>
+                    <span><strong>Вставь конспект:</strong> Любой текст из тетради или параграф учебника.</span>
+                </li>
+                <li class="flex items-start space-x-2.5">
+                    <span class="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center shrink-0 text-[10px]">2</span>
+                    <span><strong>AI-генерация за секунды:</strong> Создание нужного числа разноплановых вопросов формата ЕГЭ/ОГЭ.</span>
+                </li>
+                <li class="flex items-start space-x-2.5">
+                    <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-[10px]">3</span>
+                    <span><strong>Интерактивный разбор:</strong> Мгновенная проверка и объяснение каждого ответа.</span>
+                </li>
+            </ul>
+
+            <div class="mt-4 pt-3 border-t border-slate-800/70 text-[11px] text-slate-400 flex items-center space-x-1.5">
+                <span>🛡️</span>
+                <span><strong>Режим Zero-Fail:</strong> надёжная работа даже без интернета или внешнего API.</span>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/quiz.js' %}"></script>
+{% endblock %}
+
